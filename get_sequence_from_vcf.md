@@ -4,7 +4,11 @@ This script extracts the most probable sequence of all genotypes of a specified 
 
 ## Install
 
-`wget https://github.com/nlapalu/misc/blob/master/get_sequence_from_vcf.py`
+`wget https://github.com/nlapalu/misc/archive/master.zip`
+
+`unzip master.zip`
+
+`cd misc-master`
 
 python module [pysam](https://github.com/pysam-developers/pysam) must be installed.
 
