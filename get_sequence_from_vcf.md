@@ -4,7 +4,9 @@ This script extracts the most probable sequence of all genotypes of a specified 
 
 ## Install
 
+`wget https://github.com/nlapalu/misc/blob/master/get_sequence_from_vcf.py`
 
+python module [pysam](https://github.com/pysam-developers/pysam) must be installed.
 
 ## Usage and options
 
@@ -12,7 +14,9 @@ This script extracts the most probable sequence of all genotypes of a specified 
 
 `python get_sequence_from_vcf.py "chr_1" 1000 2000 vcf.list -v 2`
 
-| Arguments | Description |
+### Arguments:
+
+| Argument | Description |
 | --------- | ----------- |
 | contig | Sequence name | 
 | start | Start coordinate, 1-based indexing system |
@@ -42,7 +46,7 @@ Inputs are vcf files compress in *Blocked GNU Zip Format* with bgzip (available 
 
 The output is separated in two sections: the first is a multi-fasta with all genotypes, the second is a fasta-like alignment format including the reference sequence. By default outputs are written to stdout, but you can redirect them to files with *-sf* and *-af* options.
 
-In case of the vcf file does not contain any information on a requested position (example no mapping = no VCF entry), the program returns a "N". In the same way, if a position does not meet the required criteria (deepth, frequency), the program also returns a "N".
+In case of the vcf file does not contain any information on a requested position (example no mapping = no VCF entry), the program returns a "N". In the same way, if a position does not meet the required criteria (depth, frequency), the program also returns a "N".
 Indels are left aligned as in alignment and vcf files, so to obtain the most reliable fasta alignment we recommend to perform a re-alignment with a dedicated tool.
 
 
