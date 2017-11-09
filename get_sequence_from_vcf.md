@@ -44,7 +44,7 @@ python module [pysam](https://github.com/pysam-developers/pysam) must be install
 
 ## Inputs
 
-Inputs are vcf files compress in *Blocked GNU Zip Format* with bgzip (available with tabix). Then each *\*.vcf.gz* file to analyze must be written in a file (one file per line) which is supplied to the program.
+Inputs are vcf files compressed in *Blocked GNU Zip Format* with bgzip (available with tabix). Then each *\*.vcf.gz* file to analyze must be written in a file (one file per line) which is supplied to the program.
 
 ## Outputs
 
@@ -92,7 +92,7 @@ TCTTTGTATGTGGA
 TCTTTGTATGTGGA
 ```
 
-#### Example 2: one insertion in two genome compare (G1,G2) to the reference 
+#### Example 2: one insertion in two genomes compare (G1,G2) to the reference 
 
 `python get_sequence_from_vcf.py "chr_1" 2829 2832 vcf.list -v 2`
 
