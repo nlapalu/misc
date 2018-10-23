@@ -92,32 +92,43 @@ class ExtractSeqFromVCF(object):
             # get list of pos
             for val in f.fetch(str(contig), int(start), int(end)):
                for sample in val.samples.items():
-                   lAlleles = self.getAllelesFromPosition(list(val.alleles), sample[1].items())
-                   genotype = (self._getFormatTagValue(sample[1].items(),'GT',index=0),self._getFormatTagValue(sample[1].items(),'GT',index=1))
-                   depth = self._getFormatTagValue(sample[1].items(), 'DP')
+                   lAlleles, depth = self.getAllelesFromPosition(list(val.alleles), dict(val.info), sample[1].items())
+                   if depth > 0:
+                       genotype = (self._getFormatTagValue(sample[1].items(),'GT',index=0),self._getFormatTagValue(sample[1].items(),'GT',index=1))
+                   else:
+                       genotype = (None, None)
+                  # depth = self._getFormatTagValue(sample[1].items(), 'DP')
                    self.dSamples[sample[0]].addPosition(Position(val.contig, val.pos, genotype=genotype, depth=depth, lAlleles=lAlleles, lFilters=val.filter))
 
-    def getAllelesFromPosition(self, lbases, lPosFormatTags):
+    def getAllelesFromPosition(self, lbases, dPosInfoTags, lPosFormatTags):
         """get Allele from position"""
 
         lAlleles = []
+        baseRefAllele = lbases.pop(0)
+
+        # fix bug variant with no mapping
+        depthTotal = self._getInfoTagValue(dPosInfoTags, 'DP')
+        if depthTotal == 0:
+            lAlleles.append(Allele(baseRefAllele, 0, 0, refAllele=True))
+            lAlleles.append(Allele(".", 0, 0, refAllele=False))
+            return lAlleles, depthTotal
+
         #ref
         depthAllAlleles = self._getFormatTagValue(lPosFormatTags, 'DP')
-        baseRefAllele = lbases.pop(0)
         depthRefAllele = self._getFormatTagValue(lPosFormatTags, 'RO')
         freqRefAllele =  float(depthRefAllele) / depthAllAlleles
         lAlleles.append(Allele(baseRefAllele,freqRefAllele,depthRefAllele,refAllele=True))
         #alts
         for i,base in enumerate(lbases):
-            baseAltAllele = base
             depthAltAllele = self._getFormatTagValue(lPosFormatTags, 'AO', index=i)
+            baseAltAllele = base
             freqAltAllele =  float(depthAltAllele) / depthAllAlleles
             lAlleles.append(Allele(baseAltAllele,freqAltAllele,depthAltAllele,refAllele=False))
 
-        return lAlleles
+        return lAlleles, depthTotal
 
     def _getFormatTagValue(self, lTags, tag, index=0):
-        """return specific tag value, index specific"""
+        """return specific format tag value, index specific"""
 
         for t in lTags:
             if t[0] == tag:
@@ -125,6 +136,14 @@ class ExtractSeqFromVCF(object):
                     return t[1][index]
                 else:
                     return t[1]
+
+    def _getInfoTagValue(self, dTags, tag, index=0):
+        """return specific info tag value, index specific"""
+
+        if type(dTags[tag]) == tuple:
+            return dTags[tag][index]
+        else:
+            return dTags[tag]
 
     def export(self, format, contig, start, end, freq, nbAlleles, minDP, maxDP, exportFile):
         """export results"""
@@ -440,7 +459,7 @@ if __name__ == '__main__':
 
     parser.add_argument("-f","--freq", help="minimal frequence to consider the allele, filtered under this value [default=0.0]", type=float, default=0.0)
     parser.add_argument("-n","--nbAlleles", help="maximal number of alleles allowed per sample, filtered upper this value [default=2]", type=int, default=2)
-    parser.add_argument("-mi","--minDP", help="minimal depth of coverage to consider the allele, filtered under this value, [default=0]", type=int, default=0)
+    parser.add_argument("-mi","--minDP", help="minimal depth of coverage to consider the allele, filtered under this value, [default=1]", type=int, default=1)
     parser.add_argument("-ma","--maxDP", help="maximal depth of coverage to consider the allele, filtered upper this value, [default=0]", type=int, default=0)
     parser.add_argument("-sf","--seqFasta", help="export sequence in fasta file", type=str, default=None)
     parser.add_argument("-af","--algmtFasta", help="export alignment in fasta file", type=str, default=None)
