@@ -158,6 +158,7 @@ class ExtractSeqFromVCF(object):
         """Export to Fasta format"""
 
         dExportSamples = {}
+        dExportRefs = {}
 
         for sample in self.dSamples.keys():
             index = 0
@@ -185,16 +186,25 @@ class ExtractSeqFromVCF(object):
             for pos in dPos:
                 dPos[pos] = [x for x in dPos[pos] if x != '-']
             dExportSamples[sample] = dPos
+            dExportRefs[sample] = dRefPos
+           # print dExportRefs
+          #  print dExportSamples
+            dConsRefSeq = self._getConsensusRefSeq(dExportRefs, start, end)
+         #   print dConsRefSeq
 
         if exportFile:
             try:
                 with open(exportFile, 'w') as f:
+                    f.write(self._formatToFasta('reference:{}:{}:{}'.format(contig, start,end), [dConsRefSeq[pos] for pos in range(start, end+1)], 60)) 
                     for sample in dExportSamples:
                         f.write(self._formatToFasta('{}:{}:{}:{}'.format(sample, contig, start,end), [dExportSamples[sample][pos] for pos in range(start, end+1)], 60))
             except Exception as e:
                 logging.error(e)
         else:
             print("\n### sequence in fasta format ###\n") 
+            
+            print(self._formatToFasta('reference:{}:{}:{}'.format(contig, start,end), [dConsRefSeq[pos] for pos in range(start, end+1)], 60))
+            
             for sample in dExportSamples:
                 print(self._formatToFasta('{}:{}:{}:{}'.format(sample, contig, start,end), [dExportSamples[sample][pos] for pos in range(start, end+1)], 60))
  
